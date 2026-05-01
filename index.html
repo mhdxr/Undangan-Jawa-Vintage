@@ -31,11 +31,10 @@
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
             overscroll-behavior-y: none;
-            /* Anti-select teks */
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
         }
 
         /* Izinkan seleksi teks hanya pada form input agar RSVP bisa diketik */
@@ -977,8 +976,7 @@
 
         function startCountdown() {
     const weddingDate = new Date(window.WEDDING_DATA.countdownTarget).getTime();
-
-    setInterval(() => {
+    const countdownInterval = setInterval(() => {
         const now = new Date().getTime();
         const distance = weddingDate - now;
 
@@ -992,6 +990,7 @@
             document.getElementById("hours").innerText = "00";
             document.getElementById("minutes").innerText = "00";
             document.getElementById("seconds").innerText = "00";
+            clearInterval(countdownInterval);
             return;
         }
 
@@ -1097,12 +1096,20 @@
                     e.preventDefault();
                     whiteTransition.style.opacity = '1';
                     
+                    const revealMusicToggle = () => {
+                        musicToggle.classList.remove('hidden');
+                        document.getElementById('music-icon-play').classList.remove('hidden');
+                        document.getElementById('music-icon-pause').classList.add('hidden');
+                    };
                     weddingMusic.play().then(() => {
-    isPlaying = true;
-    musicToggle.classList.remove('hidden');
-    document.getElementById('music-icon-play').classList.add('hidden');
-    document.getElementById('music-icon-pause').classList.remove('hidden');
-                    }).catch(err => console.log("Music play blocked", err));
+                        isPlaying = true;
+                        document.getElementById('music-icon-play').classList.add('hidden');
+                        document.getElementById('music-icon-pause').classList.remove('hidden');
+                        revealMusicToggle();
+                    }).catch(err => {
+                        console.log("Music play blocked", err);
+                        revealMusicToggle();
+                    });
 
                     setTimeout(() => {
                         updateVh();
@@ -1407,32 +1414,6 @@ if (firebaseConfig.apiKey === "API_KEY_ANDA") {
         // ========================================================================
         
         // 1. Matikan Klik Kanan (Context Menu)
-        document.addEventListener('contextmenu', event => event.preventDefault());
-
-        // 2. Matikan kombinasi keyboard khusus (F12, Ctrl+U, Ctrl+Shift+I, dll)
-        document.addEventListener('keydown', event => {
-            // Cek apakah user sedang mengetik di form RSVP (izinkan copy-paste di dalam form)
-            const isTyping = ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName);
-
-            if (
-                event.key === 'F12' || 
-                (event.ctrlKey && event.shiftKey && (event.key === 'I' || event.key === 'i')) || 
-                (event.ctrlKey && event.shiftKey && (event.key === 'J' || event.key === 'j')) || 
-                (event.ctrlKey && (event.key === 'U' || event.key === 'u')) || 
-                (event.ctrlKey && (event.key === 'S' || event.key === 's')) || 
-                (event.metaKey && event.altKey && (event.key === 'I' || event.key === 'i')) || 
-                (event.metaKey && event.altKey && (event.key === 'U' || event.key === 'u'))
-            ) {
-                event.preventDefault();
-                return false;
-            }
-
-            // Matikan Ctrl+C / Cmd+C (Copy) JIKA tidak sedang mengisi form
-            if (!isTyping && (event.ctrlKey || event.metaKey) && (event.key === 'C' || event.key === 'c')) {
-                event.preventDefault();
-                return false;
-            }
-        });
     </script>
 </body>
 </html>
